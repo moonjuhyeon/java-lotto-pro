@@ -7,7 +7,7 @@ public class LottoResult {
 
 	public static final int DEFAULT_VALUE = 0;
 	public static final int COUNT_VALUE = 1;
-	public static final double MATH_ROUND_VALUE = 100d;
+	public static final float MATH_ROUND_VALUE = 100f;
 
 	private final WinningLottoNumbers winningLottoNumbers;
 	private final Lottos lottos;
@@ -60,8 +60,8 @@ public class LottoResult {
 		return winningLottoNumbers.containsBonusCountLottoNumber(lottoNumbers);
 	}
 
-	public double calculateYield() {
-		double sum = DEFAULT_VALUE;
+	public float calculateYield() {
+		float sum = DEFAULT_VALUE;
 		Map<LottoRank, Integer> rankMap = containsWinningLottoGenerator();
 
 		for (Map.Entry<LottoRank, Integer> rankCodeEntry : rankMap.entrySet()) {
