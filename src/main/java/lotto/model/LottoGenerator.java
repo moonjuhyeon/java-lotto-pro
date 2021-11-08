@@ -1,11 +1,16 @@
 package lotto.model;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import lotto.code.ErrorCode;
+import lotto.exception.LottoException;
+
 public class LottoGenerator {
 	public static final int LOTTO_PRICE = 1000;
+	private static final int NEGATIVE_EXP = 0;
 	private final Money money;
 	private List<String> inputNumberList;
 
@@ -18,21 +23,35 @@ public class LottoGenerator {
 		this.inputNumberList = inputNumberList;
 	}
 
-	private int calculateLottoAmount(String inputMoney) {
-		return Integer.parseInt(inputMoney) / LOTTO_PRICE;
+	public int calculateLottoAmount() {
+		if (isNullInputNumberList()) {
+			return (Integer.parseInt(money.money()) / LOTTO_PRICE);
+		}
+		return positiveLottoAmount();
+	}
+
+	public int positiveLottoAmount() {
+		if (validPositiveLottoAmount()) {
+			throw new LottoException(ErrorCode.NEGATIVE_AMOUNT_ERROR);
+		}
+		return (Integer.parseInt(money.money()) / LOTTO_PRICE) - inputNumberList.size();
+	}
+
+	public boolean validPositiveLottoAmount() {
+		return (Integer.parseInt(money.money()) / LOTTO_PRICE) - inputNumberList.size() < NEGATIVE_EXP;
 	}
 
 	public List<LottoNumbers> generateLottoNumbers() {
 		if (isNullInputNumberList()) {
 			return generateRandomLottoNumbers();
 		}
-		return generateLottoInputNumbers();
+		return generateMixLottoNumbers();
 	}
 
 	public List<LottoNumbers> generateRandomLottoNumbers() {
 		return Stream
 			.generate(LottoNumbers::new)
-			.limit(calculateLottoAmount(money.money()))
+			.limit(calculateLottoAmount())
 			.collect(Collectors.toList());
 	}
 
@@ -40,7 +59,14 @@ public class LottoGenerator {
 		return inputNumberList
 			.stream()
 			.map(LottoNumbers::new)
-			.limit(calculateLottoAmount(money.money()))
+			.limit(inputNumberList.size())
+			.collect(Collectors.toList());
+	}
+
+	public List<LottoNumbers> generateMixLottoNumbers() {
+		return Stream
+			.of(generateLottoInputNumbers(), generateRandomLottoNumbers())
+			.flatMap(Collection::stream)
 			.collect(Collectors.toList());
 	}
 
